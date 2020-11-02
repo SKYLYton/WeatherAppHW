@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="button_update_name">Обновить</string>
-    <string name="text_view_city_name">Город</string>
+    <string name="text_view_city">Город</string>
+    <string name="button_change_city">Выбрать</string>
+    <string name="check_box_add_inf">Дополнительная информация (скорость ветра и давление)</string>
+    <string name="text_view_all_inf">Вся информация</string>
+    <string name="toast_inf_empty_field">Заполните пустые поля</string>
 </resources>
