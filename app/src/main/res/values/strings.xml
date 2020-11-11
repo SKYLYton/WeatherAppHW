@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name" translatable="false">WeatherApp</string>
-    <string name="put_extra_city" translatable="false">country</string>
-    <string name="put_extra_add_inf" translatable="false">information</string>
 
     <string name="button_update_name">Update</string>
     <string name="text_view_city">Country</string>

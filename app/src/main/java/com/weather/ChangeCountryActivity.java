@@ -2,7 +2,9 @@ package com.weather;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -16,6 +18,9 @@ public class ChangeCountryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_country);
 
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.MAIN_SHARED_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
         EditText editTextCountry = findViewById(R.id.editTextCountry);
         Button buttonChange = findViewById(R.id.button);
         CheckBox checkBox = findViewById(R.id.checkBox);
@@ -26,10 +31,13 @@ public class ChangeCountryActivity extends AppCompatActivity {
                 return;
             }
 
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.putExtra(getString(R.string.put_extra_city), editTextCountry.getText());
-            intent.putExtra(getString(R.string.put_extra_add_inf), checkBox.isChecked());
-            startActivity(intent);
+            editor.putBoolean(Constants.SHARED_IS_COUNTRY_EMPTY, false);
+            editor.apply();
+
+            Intent intent = new Intent(ChangeCountryActivity.this, MainActivity.class);
+            intent.putExtra(Constants.PUT_EXTRA_CITY, editTextCountry.getText().toString());
+            intent.putExtra(Constants.PUT_EXTRA_ADD_INFORMATION, checkBox.isChecked());
+            setResult(RESULT_OK, intent);
             finish();
         });
     }
