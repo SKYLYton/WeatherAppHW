@@ -13,4 +13,5 @@ public class Constants {
 
     public static final int CHANGE_COUNTRY_REQUEST_CODE = 1;
     public static final String COUNTRY_NAME = "COUNTRY_NAME";
+    public static final String ALL_INFORMATION = "ALL_INFORMATION";
 }

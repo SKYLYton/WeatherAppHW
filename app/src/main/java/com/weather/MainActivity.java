@@ -10,12 +10,18 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
     private TextView textViewCountry;
+    private TextView textViewInf;
+    private boolean isAllInf = false;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -28,22 +34,37 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences(Constants.MAIN_SHARED_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
+        isAllInf = sharedPreferences.getBoolean(Constants.ALL_INFORMATION, false);
+
         if (sharedPreferences.getBoolean(Constants.SHARED_IS_COUNTRY_EMPTY, true)) {
             startActivityForResult(new Intent(this, ChangeCountryActivity.class), Constants.CHANGE_COUNTRY_REQUEST_CODE);
         }
 
 
         textViewCountry = findViewById(R.id.textViewCountry);
+        textViewInf = findViewById(R.id.textView2);
         ImageView imageViewEdit = findViewById(R.id.imageView);
+        Button buttonUPD = findViewById(R.id.button);
 
         if (!sharedPreferences.getString(Constants.COUNTRY_NAME, Constants.EMPTY_STRING).isEmpty()) {
             textViewCountry.setText(sharedPreferences.getString(Constants.COUNTRY_NAME, Constants.EMPTY_STRING));
+        }
+
+        if(isAllInf){
+            Random random = new Random();
+            textViewInf.setText(String.valueOf(random.nextInt(60) - 30));
         }
 
         imageViewEdit.setOnClickListener(view -> {
             startActivityForResult(new Intent(MainActivity.this, ChangeCountryActivity.class), Constants.CHANGE_COUNTRY_REQUEST_CODE);
         });
 
+        buttonUPD.setOnClickListener(view -> {
+            if(isAllInf){
+                Random random = new Random();
+                textViewInf.setText(String.valueOf(random.nextInt(60) - 30));
+            }
+        });
 
     }
 
@@ -56,15 +77,24 @@ public class MainActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK) {
             textViewCountry.setText(data.getStringExtra(Constants.PUT_EXTRA_CITY));
+            isAllInf = data.getBooleanExtra(Constants.PUT_EXTRA_ADD_INFORMATION, false);
             editor.putString(Constants.COUNTRY_NAME, data.getStringExtra(Constants.PUT_EXTRA_CITY));
+            editor.putBoolean(Constants.ALL_INFORMATION, isAllInf);
             editor.apply();
+
+            if(isAllInf){
+                Random random = new Random();
+                textViewInf.setText(String.valueOf(random.nextInt(60) - 30));
+            }
         }
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        textViewCountry.setText(savedInstanceState.getString(Constants.COUNTRY_NAME));
+        if(!savedInstanceState.getString(Constants.COUNTRY_NAME).isEmpty()) {
+            textViewCountry.setText(savedInstanceState.getString(Constants.COUNTRY_NAME));
+        }
 
     }
 
