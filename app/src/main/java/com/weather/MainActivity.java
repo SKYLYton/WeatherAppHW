@@ -47,39 +47,26 @@ public class MainActivity extends AppCompatActivity {
 
         //pushFragments(isCountryEmpty ? new SearchFragment() : countryFragment);
 
-        pushFragments(countryFragment);
+        pushFragments(countryFragment, false, null);
 
     }
 
-    public void pushFragments(Fragment fragment, @NonNull Bundle bundle) {
+    public void pushFragments(Fragment fragment, boolean addToBS, Bundle bundle) {
 
-        fragment.setArguments(bundle);
+        if(bundle != null){
+            fragment.setArguments(bundle);
+        }
 
         FragmentTransaction ft = frgManager.beginTransaction();
         ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
         ft.replace(R.id.container, fragment);
-        ft.addToBackStack(Constants.EMPTY_STRING);
-        ft.commit();
-    }
-
-    public void pushFragments(Fragment fragment) {
-        FragmentTransaction ft = frgManager.beginTransaction();
-        ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
-        ft.replace(R.id.container, fragment);
-        ft.addToBackStack(Constants.EMPTY_STRING);
+        if(addToBS) {
+            ft.addToBackStack(Constants.EMPTY_STRING);
+        }
         ft.commit();
     }
 
     public void changeCountry(String country){
         countryFragment.getCurrentParcel().setCityName(country);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if(frgManager.getBackStackEntryCount() <= 1){
-            finish();
-        } else {
-            super.onBackPressed();
-        }
     }
 }

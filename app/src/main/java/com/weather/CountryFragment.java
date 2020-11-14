@@ -63,7 +63,7 @@ public class CountryFragment extends Fragment {
 
         ImageView imageViewEdit = view.findViewById(R.id.imageView);
 
-        imageViewEdit.setOnClickListener(v -> mainActivity.pushFragments(new SearchFragment()));
+        imageViewEdit.setOnClickListener(v -> mainActivity.pushFragments(new SearchFragment(), true, null));
     }
 
     public Parcel getCurrentParcel() {
