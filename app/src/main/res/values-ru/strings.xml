@@ -6,4 +6,10 @@
     <string name="check_box_add_inf">Дополнительная информация (скорость ветра и давление)</string>
     <string name="text_view_all_inf">Вся информация</string>
     <string name="toast_inf_empty_field">Заполните пустые поля</string>
+
+    <string name="moscow">Москва</string>
+    <string name="saint_petersburg">Санкт-Петербург</string>
+    <string name="novosibirsk">Новосибирск</string>
+    <string name="kazan">Казань</string>
+    <string name="sochi">Сочи</string>
 </resources>
