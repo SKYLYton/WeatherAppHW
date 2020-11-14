@@ -43,9 +43,11 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = getSharedPreferences(Constants.MAIN_SHARED_NAME, Context.MODE_PRIVATE);
 
-        boolean isCountryEmpty = sharedPreferences.getBoolean(Constants.SHARED_IS_COUNTRY_EMPTY, true);
+        //boolean isCountryEmpty = sharedPreferences.getBoolean(Constants.SHARED_IS_COUNTRY_EMPTY, true);
 
-        pushFragments(isCountryEmpty ? new SearchFragment() : countryFragment);
+        //pushFragments(isCountryEmpty ? new SearchFragment() : countryFragment);
+
+        pushFragments(countryFragment);
 
     }
 
