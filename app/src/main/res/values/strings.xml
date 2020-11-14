@@ -8,5 +8,12 @@
     <string name="text_view_all_inf">All information</string>
     <string name="toast_inf_empty_field">Fill in the empty fields</string>
 
+    <string name="moscow">Moscow</string>
+    <string name="saint_petersburg">Saint Petersburg</string>
+    <string name="novosibirsk">Novosibirsk</string>
+    <string name="kazan">Kazan</string>
+    <string name="sochi">Sochi</string>
+
+
 
 </resources>
