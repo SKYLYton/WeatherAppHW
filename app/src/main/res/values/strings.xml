@@ -8,6 +8,10 @@
     <string name="text_view_all_inf">All information</string>
     <string name="toast_inf_empty_field">Fill in the empty fields</string>
 
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="day_after">The day after</string>
+
     <string name="moscow">Moscow</string>
     <string name="saint_petersburg">Saint Petersburg</string>
     <string name="novosibirsk">Novosibirsk</string>

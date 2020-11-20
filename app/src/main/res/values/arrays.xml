@@ -7,4 +7,10 @@
         <item>@string/kazan</item>
         <item>@string/sochi</item>
     </array>
+
+    <array name="days">
+        <item>@string/today</item>
+        <item>@string/tomorrow</item>
+        <item>@string/day_after</item>
+    </array>
 </resources>
