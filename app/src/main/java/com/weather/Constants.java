@@ -6,6 +6,8 @@ public class Constants {
 
     public static final String EMPTY_STRING = "";
 
+    public static final String SHARED_THEME_IS_DARK = "SHARED_THEME_IS_DARK";
+
     public static final String MAIN_SHARED_NAME = "MAIN_SHARED_NAME";
     public static final String SHARED_IS_COUNTRY_EMPTY = "SHARED_IS_COUNTRY_EMPTY";
 

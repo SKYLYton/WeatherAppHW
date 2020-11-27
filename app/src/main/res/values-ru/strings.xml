@@ -1,16 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    //buttons
     <string name="button_update_name">Обновить</string>
-    <string name="text_view_city">Город</string>
     <string name="button_change_city">Выбрать</string>
+
+    //checkBoxes
     <string name="check_box_add_inf">Дополнительная информация (скорость ветра и давление)</string>
+
+    //radioButtons
+    <string name="radio_button_dark_theme">Темная</string>
+    <string name="radio_button_light_theme">Светлая</string>
+
+
+    //textView
+    <string name="text_view_city">Город</string>
     <string name="text_view_all_inf">Вся информация</string>
+    <string name="text_view_developer">Разработчик:</string>
+    <string name="text_view_developer_name">Федотов Яков Олегович</string>
+    <string name="text_view_developer_contacts">Контакты:</string>
+    <string name="text_view_developer_number">Телефон: 8 (910) 555 55-55</string>
+    <string name="text_view_developer_email">Эл. адрес: fedotovyasha@mail.ru</string>
+    <string name="text_view_theme">Тема</string>
+
+    //toasts
     <string name="toast_inf_empty_field">Заполните пустые поля</string>
 
+    //days
     <string name="today">Сегодня</string>
     <string name="tomorrow">Завтра</string>
     <string name="day_after">Послезавтра</string>
 
+    //cities
     <string name="moscow">Москва</string>
     <string name="saint_petersburg">Санкт-Петербург</string>
     <string name="novosibirsk">Новосибирск</string>
