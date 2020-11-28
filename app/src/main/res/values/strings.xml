@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name" translatable="false">WeatherApp</string>
 
+    //text
+    <string name="loading">Loading</string>
 
     //buttons
     <string name="button_update_name">Update</string>
@@ -22,9 +24,13 @@
     <string name="text_view_developer_number">Number: 8 (910) 555 55-55</string>
     <string name="text_view_developer_email">Email: fedotovyasha@mail.ru</string>
     <string name="text_view_theme">Theme</string>
+    <string name="text_view_temp">Temperature:</string>
+    <string name="text_view_pressure">Pressure:</string>
+    <string name="text_view_wind">Wind speed:</string>
 
     //toasts
     <string name="toast_inf_empty_field">Fill in the empty fields</string>
+    <string name="toast_request_error">Check your Internet connection</string>
 
     //days
     <string name="today">Today</string>

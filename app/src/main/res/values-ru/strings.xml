@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    //text
+    <string name="loading">Загрузка</string>
+
     //buttons
     <string name="button_update_name">Обновить</string>
     <string name="button_change_city">Выбрать</string>
@@ -21,9 +24,13 @@
     <string name="text_view_developer_number">Телефон: 8 (910) 555 55-55</string>
     <string name="text_view_developer_email">Эл. адрес: fedotovyasha@mail.ru</string>
     <string name="text_view_theme">Тема</string>
+    <string name="text_view_temp">Температура:</string>
+    <string name="text_view_pressure">Давление:</string>
+    <string name="text_view_wind">Скорость ветра:</string>
 
     //toasts
     <string name="toast_inf_empty_field">Заполните пустые поля</string>
+    <string name="toast_request_error">Проверьте подключение к интернету</string>
 
     //days
     <string name="today">Сегодня</string>
