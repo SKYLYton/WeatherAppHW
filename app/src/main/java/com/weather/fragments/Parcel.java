@@ -4,15 +4,17 @@ import android.os.Parcelable;
 
 public class Parcel implements Parcelable {
     private String cityName;
+    private int cityId;
+
+    public Parcel(String cityName, int cityId) {
+        this.cityName = cityName;
+        this.cityId = cityId;
+    }
 
     protected Parcel(android.os.Parcel in) {
         cityName = in.readString();
+        cityId = in.readInt();
     }
-
-    public Parcel(String cityName) {
-        this.cityName = cityName;
-    }
-
 
     public static final Creator<Parcel> CREATOR = new Creator<Parcel>() {
         @Override
@@ -26,6 +28,17 @@ public class Parcel implements Parcelable {
         }
     };
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(android.os.Parcel dest, int flags) {
+        dest.writeString(cityName);
+        dest.writeInt(cityId);
+    }
+
     public String getCityName() {
         return cityName;
     }
@@ -34,13 +47,11 @@ public class Parcel implements Parcelable {
         this.cityName = cityName;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public int getCityId() {
+        return cityId;
     }
 
-    @Override
-    public void writeToParcel(android.os.Parcel parcel, int i) {
-        parcel.writeString(cityName);
+    public void setCityId(int cityId) {
+        this.cityId = cityId;
     }
 }

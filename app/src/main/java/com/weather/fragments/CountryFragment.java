@@ -6,26 +6,30 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.weather.Constants;
 import com.weather.MainActivity;
 import com.weather.R;
-import com.weather.adapters.DayItem;
-import com.weather.adapters.DaysWeatherAdapter;
+import com.weather.adapters.CityItem;
+import com.weather.adapters.CitiesWeatherAdapter;
+import com.weather.model.RequestApi;
+import com.weather.model.weather.WeatherRequest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class CountryFragment extends Fragment {
 
@@ -34,8 +38,7 @@ public class CountryFragment extends Fragment {
     private SharedPreferences.Editor editor;
     private Parcel currentParcel;
     private MainActivity mainActivity;
-    private List<DayItem> dayList = new ArrayList<>();
-    private DaysWeatherAdapter daysWeatherAdapter;
+    private RequestApi requestApi;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,7 +53,7 @@ public class CountryFragment extends Fragment {
             currentParcel = (Parcel) savedInstanceState.getParcelable(Constants.CURRENT_PARCEL);
         } else {
             String nameCity = sharedPreferences.getString(Constants.SHARED_COUNTRY_NAME, getResources().getStringArray(R.array.cities)[0]);
-            currentParcel = new Parcel(nameCity);
+            currentParcel = new Parcel(nameCity, mainActivity.getCurrentCityId());
         }
 
         init(view);
@@ -66,64 +69,56 @@ public class CountryFragment extends Fragment {
 
     private void init(View view) {
 
-        daysWeatherAdapter = initDaysWeatherList(view);
-
         textViewCountry = view.findViewById(R.id.textViewCountry);
+        TextView textViewType = view.findViewById(R.id.textViewType);
+        TextView textViewTemp = view.findViewById(R.id.textViewTemp);
+        TextView textViewPressure = view.findViewById(R.id.textViewPress);
+        TextView textViewWind = view.findViewById(R.id.textViewWind);
+
 
         ImageView imageViewEdit = view.findViewById(R.id.imageView);
 
         imageViewEdit.setOnClickListener(v -> mainActivity.pushFragments(new SearchFragment(), true, null));
+
+        requestApi = new RequestApi.Builder(Constants.URL_CONNECTION, WeatherRequest.class)
+                .requestType(RequestApi.Type.GET)
+                .addPar(Constants.API_UNITS_NAME, Constants.API_UNITS_METRIC)
+                .addPar(Constants.API_LANGUAGE_NAME, Constants.API_LANGUAGE_RU)
+                .addPar(Constants.API_CITY_ID_NAME, currentParcel.getCityId())
+                .addPar(Constants.API_KEY_NAME, Constants.API_KEY)
+                .setOnRequestApiListener(new RequestApi.OnRequestApiListener() {
+                    @Override
+                    public void onSuccess(@Nullable Object object, int responseCode) {
+                        WeatherRequest weatherRequest = (WeatherRequest) object;
+
+                        currentParcel.setCityName(weatherRequest.getName());
+
+                        textViewCountry.setText(weatherRequest.getName());
+
+                        textViewType.setText(firstUpperCase(weatherRequest.getWeather()[0].getDescription()));
+
+                        textViewTemp.setText(String.valueOf(weatherRequest.getMain().getTemp()));
+
+                        textViewPressure.setText(String.valueOf(weatherRequest.getMain().getPressure()));
+
+                        textViewWind.setText(String.valueOf(weatherRequest.getWind().getSpeed()));
+
+                    }
+
+                    @Override
+                    public void onError() {
+                        Toast.makeText(getContext(), getString(R.string.toast_request_error), Toast.LENGTH_LONG).show();
+                    }
+                }).build();
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
-    private DaysWeatherAdapter initDaysWeatherList(View view) {
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerViewDays);
-
-        DividerItemDecoration itemDecoration = new DividerItemDecoration(view.getContext(), LinearLayoutManager.VERTICAL);
-        itemDecoration.setDrawable(view.getContext().getDrawable(R.drawable.separator));
-        recyclerView.addItemDecoration(itemDecoration);
-
-        DaysWeatherAdapter daysWeatherAdapter = new DaysWeatherAdapter(dayList);
-
-        recyclerView.setAdapter(daysWeatherAdapter);
-
-        return daysWeatherAdapter;
+    public String firstUpperCase(String word){
+        if(word == null || word.isEmpty()) return "";
+        return word.substring(0, 1).toUpperCase() + word.substring(1);
     }
 
     public Parcel getCurrentParcel() {
         return currentParcel;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        textViewCountry.setText(currentParcel.getCityName());
-
-        final int MAX_DAYS = getResources().getStringArray(R.array.days).length;
-
-        //Временно!
-        // Нормально сделаю, когда будем получение данных из интернета проходить:)
-        //------------------
-        Random random = new Random();
-        if(dayList.size() < MAX_DAYS) {
-            for (int i = dayList.size(); i < MAX_DAYS; i++) {
-
-                //Лень дату прикручивать :)
-                String date = (i + 5) + "/08/2020";
-
-                String dayName = getResources().getStringArray(R.array.days)[i];
-
-                dayList.add(new DayItem(dayName, date, String.valueOf(random.nextInt(60) - 30)));
-                daysWeatherAdapter.notifyItemInserted(dayList.size() - 1);
-            }
-        } else {
-            for (int i = 0; i < MAX_DAYS; i++) {
-                dayList.get(i).setTemperature(String.valueOf(random.nextInt(60) - 30));
-                daysWeatherAdapter.notifyItemChanged(i);
-            }
-        }
-
-        //-------------------
-    }
 }

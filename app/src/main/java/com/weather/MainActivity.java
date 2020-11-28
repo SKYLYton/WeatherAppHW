@@ -5,12 +5,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.weather.fragments.AboutFragment;
 import com.weather.fragments.CountryFragment;
 import com.weather.fragments.SettingsFragment;
+import com.weather.model.RequestApi;
+import com.weather.model.weather.WeatherRequest;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,7 +41,12 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private MainParcel currentMainParcel;
+    private CountryFragment countryFragment;
+    private int currentCityId;
 
+    public int getCurrentCityId() {
+        return currentCityId;
+    }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -63,12 +71,14 @@ public class MainActivity extends AppCompatActivity {
             currentMainParcel = new MainParcel(false, TAB_MAIN);
         }
 
-        if(sharedPreferences.getBoolean(Constants.SHARED_THEME_IS_DARK, false) &&
-                AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES){
+        if (sharedPreferences.getBoolean(Constants.SHARED_THEME_IS_DARK, false) &&
+                AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES) {
             setTheme(true);
-        } else if(!sharedPreferences.getBoolean(Constants.SHARED_THEME_IS_DARK, false) &&
-                AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO) {
+            return;
+        } else if (!sharedPreferences.getBoolean(Constants.SHARED_THEME_IS_DARK, false) &&
+                AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
             setTheme(false);
+            return;
         }
 
         frgManager = getSupportFragmentManager();
@@ -79,9 +89,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void init(){
+    private void init() {
 
-        if(mStacks == null) {
+        currentCityId = sharedPreferences.getInt(Constants.SHARED_COUNTRY_ID, Constants.DEFAULT_CITY_ID);
+
+        if (mStacks == null) {
             mStacks = new HashMap<String, Stack<Fragment>>();
             mStacks.put(TAB_MAIN, new Stack<Fragment>());
             mStacks.put(TAB_ABOUT, new Stack<Fragment>());
@@ -152,7 +164,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        //pushFragments(new CountryFragment(), false, null);
 
     }
 
@@ -164,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
             switch (getCurrentTab()) {
                 case TAB_MAIN:
                     fragment = new CountryFragment();
+                    countryFragment = (CountryFragment) fragment;
                     break;
                 case TAB_ABOUT:
                     fragment = new AboutFragment();
@@ -183,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
             mStacks.get(getCurrentTab()).push(fragment);
         }
 
-        if(bundle != null){
+        if (bundle != null) {
             fragment.setArguments(bundle);
         }
 
@@ -193,8 +205,10 @@ public class MainActivity extends AppCompatActivity {
         ft.commit();
     }
 
-    public void changeCountry(String country){
-        //countryFragment.getCurrentParcel().setCityName(country);
+    public void changeCountry(int id, String country) {
+        countryFragment.getCurrentParcel().setCityName(country);
+        countryFragment.getCurrentParcel().setCityId(id);
+        currentCityId = id;
     }
 
     public String getCurrentTab() {
@@ -213,8 +227,8 @@ public class MainActivity extends AppCompatActivity {
         pushFragments(fragment, false, null);
     }
 
-    public void setTheme(boolean isDark){
-        if(isDark){
+    public void setTheme(boolean isDark) {
+        if (isDark) {
             AppCompatDelegate.setDefaultNightMode(
                     AppCompatDelegate.MODE_NIGHT_YES);
         } else {
@@ -223,10 +237,9 @@ public class MainActivity extends AppCompatActivity {
         }
         editor.putBoolean(Constants.SHARED_THEME_IS_DARK, isDark);
         editor.commit();
-        //recreate();
     }
 
-    public boolean isDarkTheme(){
+    public boolean isDarkTheme() {
         return AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES;
     }
 
