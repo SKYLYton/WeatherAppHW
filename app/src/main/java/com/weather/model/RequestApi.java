@@ -35,12 +35,9 @@ public class RequestApi {
     private static final int TIMEOUT = 10000;
     private final String URL;
     private final StringBuilder param;
-    private final Class c;
     private final OnRequestApiListener onRequestApiListener;
-    private final Gson gson;
-
     public interface OnRequestApiListener {
-        void onSuccess(@Nullable Object object, int responseCode);
+        void onSuccess(@Nullable String result, int responseCode);
 
         void onError();
     }
@@ -49,9 +46,7 @@ public class RequestApi {
         this.URL = builder.URL;
         this.typeRequest = builder.typeRequest;
         this.param = builder.param;
-        this.c = builder.c;
         this.onRequestApiListener = builder.onRequestApiListener;
-        gson = new Gson();
         request();
     }
 
@@ -60,12 +55,10 @@ public class RequestApi {
         private String typeRequest = GET;
         private StringBuilder param = new StringBuilder();
         private final String URL;
-        private Class c;
         private OnRequestApiListener onRequestApiListener;
 
-        public Builder(String url, Class c) {
+        public Builder(String url) {
             this.URL = url;
-            this.c = c;
         }
 
         public Builder requestType(Type requestType) {
@@ -121,9 +114,9 @@ public class RequestApi {
     }
 
     private void request() {
+        final Handler handler = new Handler();
         try {
             final URL uri = new URL(URL + param.toString());
-            final Handler handler = new Handler(); // Запоминаем основной поток
             new Thread(() -> {
                 HttpsURLConnection urlConnection = null;
                 try {
@@ -147,23 +140,12 @@ public class RequestApi {
                         Log.d(TAG, result);
                     }
 
-                    Object obj = null;
-
-                    try {
-                        obj = gson.fromJson(result, c);
-                    } catch (JsonSyntaxException ignored){
-                        Log.e(TAG, "JsonError", ignored);
-                    }
-
-                    final Object finalObj = obj;
-                    handler.post(() -> {
-                        onRequestApiListener.onSuccess(finalObj, code);
-                    });
+                    handler.post(() -> onRequestApiListener.onSuccess(result, code));
 
                 } catch (Exception e) {
                     Log.e(TAG, "Fail connection", e);
                     e.printStackTrace();
-                    onRequestApiListener.onError();
+                    handler.post(onRequestApiListener::onError);
                 } finally {
                     if (null != urlConnection) {
                         urlConnection.disconnect();
@@ -173,7 +155,7 @@ public class RequestApi {
         } catch (MalformedURLException e) {
             Log.e(TAG, "Fail URI", e);
             e.printStackTrace();
-            onRequestApiListener.onError();
+            handler.post(onRequestApiListener::onError);
         }
     }
 

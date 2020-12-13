@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,8 +19,10 @@ import com.weather.Constants;
 import com.weather.MainActivity;
 import com.weather.R;
 import com.weather.model.RequestApi;
+import com.weather.model.weather.WeatherParser;
 import com.weather.model.weather.WeatherRequest;
 
+import java.net.HttpURLConnection;
 import java.util.Locale;
 
 public class CountryFragment extends Fragment {
@@ -73,7 +74,7 @@ public class CountryFragment extends Fragment {
 
         imageViewEdit.setOnClickListener(v -> mainActivity.pushFragments(new SearchFragment(), true, null));
 
-        requestApi = new RequestApi.Builder(Constants.URL_CONNECTION, WeatherRequest.class)
+        requestApi = new RequestApi.Builder(Constants.URL_CONNECTION)
                 .requestType(RequestApi.Type.GET)
                 .addPar(Constants.API_UNITS_NAME, Constants.API_UNITS_METRIC)
                 .addPar(Constants.API_LANGUAGE_NAME, Locale.getDefault().getCountry())
@@ -81,27 +82,31 @@ public class CountryFragment extends Fragment {
                 .addPar(Constants.API_KEY_NAME, Constants.API_KEY)
                 .setOnRequestApiListener(new RequestApi.OnRequestApiListener() {
                     @Override
-                    public void onSuccess(@Nullable Object object, int responseCode) {
-                        WeatherRequest weatherRequest = (WeatherRequest) object;
+                    public void onSuccess(@Nullable String result, int responseCode) {
+                        if(responseCode == HttpURLConnection.HTTP_OK) {
+                            WeatherRequest weatherRequest = new WeatherParser(result).getWeatherRequest();
 
-                        currentParcel.setCityName(weatherRequest.getName());
+                            currentParcel.setCityName(weatherRequest.getName());
 
-                        textViewCountry.setText(weatherRequest.getName());
-                        mainActivity.setCountryText(weatherRequest.getName());
+                            textViewCountry.setText(weatherRequest.getName());
+                            mainActivity.setCountryText(weatherRequest.getName());
 
-                        textViewType.setText(firstUpperCase(weatherRequest.getWeather()[0].getDescription()));
+                            textViewType.setText(firstUpperCase(weatherRequest.getWeather()[0].getDescription()));
 
-                        textViewTemp.setText(String.valueOf(weatherRequest.getMain().getTemp()));
+                            textViewTemp.setText(String.valueOf(weatherRequest.getMain().getTemp()));
 
-                        textViewPressure.setText(String.valueOf(weatherRequest.getMain().getPressure()));
+                            textViewPressure.setText(String.valueOf(weatherRequest.getMain().getPressure()));
 
-                        textViewWind.setText(String.valueOf(weatherRequest.getWind().getSpeed()));
+                            textViewWind.setText(String.valueOf(weatherRequest.getWind().getSpeed()));
+                        } else {
+                            Toast.makeText(getContext(), getString(R.string.toast_request_error), Toast.LENGTH_LONG).show();
+                        }
 
                     }
 
                     @Override
                     public void onError() {
-                        Toast.makeText(getContext(), getString(R.string.toast_request_error), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), getString(R.string.toast_request_no_data), Toast.LENGTH_LONG).show();
                     }
                 }).build();
     }

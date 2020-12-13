@@ -37,7 +37,8 @@
 
     //toasts
     <string name="toast_inf_empty_field">Заполните пустые поля</string>
-    <string name="toast_request_error">Проверьте подключение к интернету</string>
+    <string name="toast_request_no_data">Проверьте подключение к интернету</string>
+    <string name="toast_request_error">Не удалось получить данные с сервера</string>
 
     //days
     <string name="today">Сегодня</string>
