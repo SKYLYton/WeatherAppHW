@@ -79,9 +79,13 @@ public class SearchFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
+                if(cityModelList == null){
+                    return;
+                }
                 cityItems.clear();
                 for (int i = 0; i < cityModelList.size(); i++) {
-                    if(cityModelList.get(i).getCountry().equals("RU") && cityModelList.get(i).getName().contains(s)) {
+                    if(cityModelList.get(i).getCountry().equals(Constants.LANGUAGE_RU) &&
+                            cityModelList.get(i).getName().toLowerCase().contains(s.toString().toLowerCase())) {
                         cityItems.add(new CityItem(cityModelList.get(i).getName(), cityModelList.get(i).getId()));
                     }
                 }
@@ -99,20 +103,29 @@ public class SearchFragment extends Fragment {
         DividerItemDecoration itemDecoration = new DividerItemDecoration(view.getContext(), LinearLayoutManager.VERTICAL);
         itemDecoration.setDrawable(view.getContext().getDrawable(R.drawable.separator));
         recyclerView.addItemDecoration(itemDecoration);
-
-        Gson gson = new Gson();
-
-        cityModelList = gson.fromJson(getCities(), CitiesModel.class).getList();
-
-        for (int i = 0; i < cityModelList.size(); i++) {
-            if(cityModelList.get(i).getCountry().equals("RU")) {
-                cityItems.add(new CityItem(cityModelList.get(i).getName(), cityModelList.get(i).getId()));
-            }
-        }
-
         CitiesWeatherAdapter citiesWeatherAdapter = new CitiesWeatherAdapter(cityItems);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Gson gson = new Gson();
 
-        recyclerView.setAdapter(citiesWeatherAdapter);
+                cityModelList = gson.fromJson(getCities(), CitiesModel.class).getList();
+
+                for (int i = 0; i < cityModelList.size(); i++) {
+                    if(cityModelList.get(i).getCountry().equals(Constants.LANGUAGE_RU)) {
+                        cityItems.add(new CityItem(cityModelList.get(i).getName(), cityModelList.get(i).getId()));
+                    }
+                }
+
+                mainActivity.runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        recyclerView.setAdapter(citiesWeatherAdapter);
+                    }
+                });
+            }
+        }).start();
 
         citiesWeatherAdapter.setOnItemSelect((cityId, cityName) -> {
             editor.putBoolean(Constants.SHARED_IS_COUNTRY_EMPTY, false);

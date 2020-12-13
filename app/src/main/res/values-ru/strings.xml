@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    //menu
+    <string name="home">Погода</string>
+    <string name="about">О приложении</string>
+    <string name="settings">Настройки</string>
+
     //text
     <string name="loading">Загрузка</string>
 
@@ -13,7 +18,8 @@
     //radioButtons
     <string name="radio_button_dark_theme">Темная</string>
     <string name="radio_button_light_theme">Светлая</string>
-
+    <string name="radio_button_side_type">Боковое меню</string>
+    <string name="radio_button_bottom_type">Нижнее меню</string>
 
     //textView
     <string name="text_view_city">Город</string>
@@ -24,6 +30,7 @@
     <string name="text_view_developer_number">Телефон: 8 (910) 555 55-55</string>
     <string name="text_view_developer_email">Эл. адрес: fedotovyasha@mail.ru</string>
     <string name="text_view_theme">Тема</string>
+    <string name="text_view_menu_type">Тип меню</string>
     <string name="text_view_temp">Температура:</string>
     <string name="text_view_pressure">Давление:</string>
     <string name="text_view_wind">Скорость ветра:</string>

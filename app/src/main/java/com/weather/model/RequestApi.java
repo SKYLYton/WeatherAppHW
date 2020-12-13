@@ -1,7 +1,5 @@
 package com.weather.model;
 
-import android.content.Context;
-import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
@@ -10,7 +8,6 @@ import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.weather.Constants;
-import com.weather.MainActivity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +17,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
 
 import javax.net.ssl.HttpsURLConnection;
 

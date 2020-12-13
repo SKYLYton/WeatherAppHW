@@ -1,6 +1,5 @@
 package com.weather.fragments;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -8,14 +7,11 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,13 +19,10 @@ import android.widget.Toast;
 import com.weather.Constants;
 import com.weather.MainActivity;
 import com.weather.R;
-import com.weather.adapters.CityItem;
-import com.weather.adapters.CitiesWeatherAdapter;
 import com.weather.model.RequestApi;
 import com.weather.model.weather.WeatherRequest;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Locale;
 
 public class CountryFragment extends Fragment {
 
@@ -76,14 +69,14 @@ public class CountryFragment extends Fragment {
         TextView textViewWind = view.findViewById(R.id.textViewWind);
 
 
-        ImageView imageViewEdit = view.findViewById(R.id.imageView);
+        ImageButton imageViewEdit = view.findViewById(R.id.imageButton);
 
         imageViewEdit.setOnClickListener(v -> mainActivity.pushFragments(new SearchFragment(), true, null));
 
         requestApi = new RequestApi.Builder(Constants.URL_CONNECTION, WeatherRequest.class)
                 .requestType(RequestApi.Type.GET)
                 .addPar(Constants.API_UNITS_NAME, Constants.API_UNITS_METRIC)
-                .addPar(Constants.API_LANGUAGE_NAME, Constants.API_LANGUAGE_RU)
+                .addPar(Constants.API_LANGUAGE_NAME, Locale.getDefault().getCountry())
                 .addPar(Constants.API_CITY_ID_NAME, currentParcel.getCityId())
                 .addPar(Constants.API_KEY_NAME, Constants.API_KEY)
                 .setOnRequestApiListener(new RequestApi.OnRequestApiListener() {
@@ -94,6 +87,7 @@ public class CountryFragment extends Fragment {
                         currentParcel.setCityName(weatherRequest.getName());
 
                         textViewCountry.setText(weatherRequest.getName());
+                        mainActivity.setCountryText(weatherRequest.getName());
 
                         textViewType.setText(firstUpperCase(weatherRequest.getWeather()[0].getDescription()));
 

@@ -1,6 +1,8 @@
 package com.weather.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -11,11 +13,14 @@ import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import com.weather.Constants;
 import com.weather.MainActivity;
 import com.weather.R;
 
 public class SettingsFragment extends Fragment {
     private MainActivity mainActivity;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -23,6 +28,9 @@ public class SettingsFragment extends Fragment {
         View view =  inflater.inflate(R.layout.fragment_settings, container, false);
 
         mainActivity = (MainActivity) getActivity();
+
+        sharedPreferences = getContext().getSharedPreferences(Constants.MAIN_SHARED_NAME, Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
 
         init(view);
 
@@ -46,6 +54,27 @@ public class SettingsFragment extends Fragment {
                         break;
                     case R.id.radioButtonLight:
                         mainActivity.setTheme(false);
+                        break;
+                }
+            }
+        });
+
+        RadioGroup radioGroupTypeMenu = view.findViewById(R.id.radioGroupTypeMenu);
+        RadioButton radioButtonSide = view.findViewById(R.id.radioButtonSide);
+        RadioButton radioButtonBottom = view.findViewById(R.id.radioButtonBottom);
+
+        radioButtonBottom.setChecked(!mainActivity.isSideMenu());
+
+        radioGroupTypeMenu.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @SuppressLint("NonConstantResourceId")
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                switch (i){
+                    case R.id.radioButtonSide:
+                        mainActivity.setTypeMenu(true);
+                        break;
+                    case R.id.radioButtonBottom:
+                        mainActivity.setTypeMenu(false);
                         break;
                 }
             }
