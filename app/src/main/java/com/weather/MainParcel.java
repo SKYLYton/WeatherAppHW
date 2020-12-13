@@ -7,15 +7,19 @@ public class MainParcel implements Parcelable {
 
     private boolean isDark;
     private String currentTab;
+    private String currentCountry;
+
 
     protected MainParcel(Parcel in) {
         isDark = in.readByte() != 0;
         currentTab = in.readString();
+        currentCountry = in.readString();
     }
 
-    public MainParcel(boolean isDark, String currentTab) {
+    public MainParcel(boolean isDark, String currentTab, String currentCountry) {
         this.isDark = isDark;
         this.currentTab = currentTab;
+        this.currentCountry = currentCountry;
     }
 
     public static final Creator<MainParcel> CREATOR = new Creator<MainParcel>() {
@@ -36,13 +40,18 @@ public class MainParcel implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeByte((byte) (isDark ? 1 : 0));
-        parcel.writeString(currentTab);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByte((byte) (isDark ? 1 : 0));
+        dest.writeString(currentTab);
+        dest.writeString(currentCountry);
     }
 
     public boolean isDark() {
         return isDark;
+    }
+
+    public void setDark(boolean dark) {
+        isDark = dark;
     }
 
     public String getCurrentTab() {
@@ -51,5 +60,13 @@ public class MainParcel implements Parcelable {
 
     public void setCurrentTab(String currentTab) {
         this.currentTab = currentTab;
+    }
+
+    public String getCurrentCountry() {
+        return currentCountry;
+    }
+
+    public void setCurrentCountry(String currentCountry) {
+        this.currentCountry = currentCountry;
     }
 }

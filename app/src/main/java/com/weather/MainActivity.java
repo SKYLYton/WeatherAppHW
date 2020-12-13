@@ -5,19 +5,26 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.weather.fragments.AboutFragment;
 import com.weather.fragments.CountryFragment;
 import com.weather.fragments.SettingsFragment;
-import com.weather.model.RequestApi;
-import com.weather.model.weather.WeatherRequest;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -34,18 +41,32 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAB_MAIN = "tab_main";
     private static final String TAB_ABOUT = "tab_about";
     private static final String TAB_SETTINGS = "tab_settings";
+    private static final int TAB_MAIN_ID = 0;
+    private static final int TAB_ABOUT_ID = 1;
+    private static final int TAB_SETTINGS_ID = 2;
     private String mCurrentTab = TAB_MAIN;
     private FragmentManager frgManager;
     private Map<String, Stack<Fragment>> mStacks;
-    private BottomNavigationView navView;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private MainParcel currentMainParcel;
     private CountryFragment countryFragment;
+    private boolean isSideMenu = false;
     private int currentCityId;
+    private String currentCountryText;
+    private TextView textViewCountry;
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
 
     public int getCurrentCityId() {
         return currentCityId;
+    }
+
+    public void setCountryText(String countryText){
+        currentMainParcel.setCurrentCountry(countryText);
+        if(isSideMenu) {
+            textViewCountry.setText(countryText);
+        }
     }
 
     @Override
@@ -56,83 +77,133 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
+    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
         sharedPreferences = getSharedPreferences(Constants.MAIN_SHARED_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
+        isSideMenu = sharedPreferences.getString(Constants.SHARED_MENU_TYPE, Constants.SHARED_SIDE_MENU).equals(Constants.SHARED_SIDE_MENU);
+
+        if (isSideMenu) {
+            setContentView(R.layout.activity_side_menu);
+        } else {
+            setContentView(R.layout.activity_main);
+        }
+
         if (savedInstanceState != null) {
             currentMainParcel = (MainParcel) savedInstanceState.getParcelable(Constants.CURRENT_PARCEL);
             setCurrentTab(currentMainParcel.getCurrentTab());
+            currentCountryText = currentMainParcel.getCurrentCountry();
         } else {
-            currentMainParcel = new MainParcel(false, TAB_MAIN);
-        }
-
-        if (sharedPreferences.getBoolean(Constants.SHARED_THEME_IS_DARK, false) &&
-                AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES) {
-            setTheme(true);
-            return;
-        } else if (!sharedPreferences.getBoolean(Constants.SHARED_THEME_IS_DARK, false) &&
-                AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
-            setTheme(false);
-            return;
+            currentMainParcel = new MainParcel(false, TAB_MAIN, currentCountryText);
         }
 
         frgManager = getSupportFragmentManager();
-
-        navView = findViewById(R.id.nav_view);
-
-        init();
-
-    }
-
-    private void init() {
-
         currentCityId = sharedPreferences.getInt(Constants.SHARED_COUNTRY_ID, Constants.DEFAULT_CITY_ID);
 
+        initStack();
+        if(!isSideMenu) {
+            initBottomNavView();
+        } else {
+            Toolbar toolbar = initToolbar();
+            initNavView(toolbar);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+
+        MenuItem settings = menu.findItem(R.id.action_settings);
+
+        settings.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if(isSideMenu){
+                    setCurrentTab(TAB_SETTINGS);
+                    setSelectedItemNavView(TAB_SETTINGS_ID);
+                    selectedTab();
+                }
+                return true;
+            }
+        });
+
+        return true;
+    }
+
+    private void initStack(){
         if (mStacks == null) {
             mStacks = new HashMap<String, Stack<Fragment>>();
             mStacks.put(TAB_MAIN, new Stack<Fragment>());
             mStacks.put(TAB_ABOUT, new Stack<Fragment>());
             mStacks.put(TAB_SETTINGS, new Stack<Fragment>());
         }
+    }
 
-        navView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @SuppressLint("NonConstantResourceId")
+    private Toolbar initToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        return toolbar;
+    }
+
+    private void initNavView(Toolbar toolbar) {
+        drawer = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+
+        View view = navigationView.getHeaderView(0);
+        textViewCountry = view.findViewById(R.id.textViewCountry);
+        textViewCountry.setText(currentMainParcel.getCurrentCountry());
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                if (SystemClock.elapsedRealtime() - mLastClickTime < 500) {
-                    return false;
+                if(selectedItem(item)){
+                    getSupportActionBar().setTitle(item.getTitle());
+                    drawer.closeDrawer(GravityCompat.START);
+                    return true;
                 }
-                mLastClickTime = SystemClock.elapsedRealtime();
+                return false;
+            }
+        });
 
-                switch (item.getItemId()) {
-                    case R.id.navigation_home:
+        int id = 0;
+        switch (getCurrentTab()) {
+            case TAB_MAIN:
+                id = TAB_MAIN_ID;
+                break;
+            case TAB_ABOUT:
+                id = TAB_ABOUT_ID;
+                break;
+            case TAB_SETTINGS:
+                id = TAB_SETTINGS_ID;
+                break;
+        }
 
-                        setCurrentTab(TAB_MAIN);
+        setSelectedItemNavView(id);
 
-                        break;
+        selectedTab();
+    }
 
-                    case R.id.navigation_about:
+    private void setSelectedItemNavView(int id){
+        getSupportActionBar().setTitle(navigationView.getMenu().getItem(id).getTitle());
+        navigationView.setCheckedItem(navigationView.getMenu().getItem(id));
+    }
 
-                        setCurrentTab(TAB_ABOUT);
+    private void initBottomNavView() {
+        BottomNavigationView navView = findViewById(R.id.bottom_nav_view);
 
-                        break;
-
-                    case R.id.navigation_settings:
-
-                        setCurrentTab(TAB_SETTINGS);
-
-                        break;
-                }
-
-                currentMainParcel.setCurrentTab(getCurrentTab());
-                selectedTab();
-
-                return true;
+        navView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                return selectedItem(item);
             }
         });
 
@@ -165,6 +236,38 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    private boolean selectedItem(MenuItem item){
+        if (SystemClock.elapsedRealtime() - mLastClickTime < 500) {
+            return false;
+        }
+        mLastClickTime = SystemClock.elapsedRealtime();
+
+        switch (item.getItemId()) {
+            case R.id.navigation_home:
+
+                setCurrentTab(TAB_MAIN);
+
+                break;
+
+            case R.id.navigation_about:
+
+                setCurrentTab(TAB_ABOUT);
+
+                break;
+
+            case R.id.navigation_settings:
+
+                setCurrentTab(TAB_SETTINGS);
+
+                break;
+        }
+
+        currentMainParcel.setCurrentTab(getCurrentTab());
+        selectedTab();
+        return true;
     }
 
     private void selectedTab() {
@@ -200,7 +303,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         FragmentTransaction ft = frgManager.beginTransaction();
-        ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
+        if(!isSideMenu) {
+            ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
+        }
         ft.replace(R.id.container, fragment);
         ft.commit();
     }
@@ -211,20 +316,20 @@ public class MainActivity extends AppCompatActivity {
         currentCityId = id;
     }
 
-    public String getCurrentTab() {
-        return mCurrentTab;
-    }
-
-    public void setCurrentTab(String mCurrentTab) {
-        this.mCurrentTab = mCurrentTab;
-    }
-
     public void popFragments() {
         mStacks.get(getCurrentTab()).pop();
 
         Fragment fragment = mStacks.get(getCurrentTab()).elementAt(mStacks.get(getCurrentTab()).size() - 1);
 
         pushFragments(fragment, false, null);
+    }
+
+    public String getCurrentTab() {
+        return mCurrentTab;
+    }
+
+    public void setCurrentTab(String mCurrentTab) {
+        this.mCurrentTab = mCurrentTab;
     }
 
     public void setTheme(boolean isDark) {
@@ -239,12 +344,28 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
+    public void setTypeMenu(boolean isSide) {
+        editor.putString(Constants.SHARED_MENU_TYPE,
+                isSide ? Constants.SHARED_SIDE_MENU : Constants.SHARED_BOTTOM_MENU);
+        editor.commit();
+        recreate();
+    }
+
+    public boolean isSideMenu(){
+        return isSideMenu;
+    }
+
     public boolean isDarkTheme() {
         return AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES;
     }
 
     @Override
     public void onBackPressed() {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+            return;
+        }
+
         if (mStacks.get(getCurrentTab()).size() <= 1) {
             super.onBackPressed();
             return;
