@@ -8,7 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.weather.Constants;
 import com.weather.R;
+import com.weather.bottomsheet.NotificationBottomSheetDialog;
 
 public class AboutFragment extends Fragment {
 
@@ -18,12 +20,6 @@ public class AboutFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_about, container, false);
 
-        init(view);
-
         return view;
-    }
-
-    private void init(View view){
-
     }
 }

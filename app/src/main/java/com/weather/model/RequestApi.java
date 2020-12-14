@@ -140,12 +140,16 @@ public class RequestApi {
                         Log.d(TAG, result);
                     }
 
-                    handler.post(() -> onRequestApiListener.onSuccess(result, code));
+                    if (onRequestApiListener != null) {
+                        handler.post(() -> onRequestApiListener.onSuccess(result, code));
+                    }
 
                 } catch (Exception e) {
                     Log.e(TAG, "Fail connection", e);
                     e.printStackTrace();
-                    handler.post(onRequestApiListener::onError);
+                    if (onRequestApiListener != null) {
+                        handler.post(onRequestApiListener::onError);
+                    }
                 } finally {
                     if (null != urlConnection) {
                         urlConnection.disconnect();
@@ -155,7 +159,9 @@ public class RequestApi {
         } catch (MalformedURLException e) {
             Log.e(TAG, "Fail URI", e);
             e.printStackTrace();
-            handler.post(onRequestApiListener::onError);
+            if (onRequestApiListener != null) {
+                handler.post(onRequestApiListener::onError);
+            }
         }
     }
 
