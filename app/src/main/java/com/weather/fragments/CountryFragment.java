@@ -18,6 +18,8 @@ import android.widget.Toast;
 import com.weather.Constants;
 import com.weather.MainActivity;
 import com.weather.R;
+import com.weather.bottomsheet.BottomSheetCreator;
+import com.weather.bottomsheet.NotificationBottomSheetDialog;
 import com.weather.model.RequestApi;
 import com.weather.model.weather.WeatherParser;
 import com.weather.model.weather.WeatherRequest;
@@ -99,14 +101,14 @@ public class CountryFragment extends Fragment {
 
                             textViewWind.setText(String.valueOf(weatherRequest.getWind().getSpeed()));
                         } else {
-                            Toast.makeText(getContext(), getString(R.string.toast_request_error), Toast.LENGTH_LONG).show();
+                            BottomSheetCreator.show(getContext(), getString(R.string.toast_request_error));
                         }
 
                     }
 
                     @Override
                     public void onError() {
-                        Toast.makeText(getContext(), getString(R.string.toast_request_no_data), Toast.LENGTH_LONG).show();
+                        BottomSheetCreator.show(getContext(), getString(R.string.toast_request_no_data));
                     }
                 }).build();
     }

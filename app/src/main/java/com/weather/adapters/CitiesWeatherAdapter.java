@@ -45,7 +45,11 @@ public class CitiesWeatherAdapter extends RecyclerView.Adapter<CitiesWeatherAdap
 
         holder.getTextViewName().setText(cityItem.getCityName());
 
-        holder.getView().setOnClickListener(v -> onItemSelect.itemSelected(cityItem.getId(), cityItem.getCityName()));
+        holder.getView().setOnClickListener(v -> {
+            if(onItemSelect != null) {
+                onItemSelect.itemSelected(cityItem.getId(), cityItem.getCityName());
+            }
+        });
     }
 
     @Override

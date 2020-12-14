@@ -35,4 +35,10 @@ public class Constants {
     public static final String CURRENT_PARCEL = "CURRENT_PARCEL";
 
     public static final String FILE_CITIES_NAME = "cityList.json";
+
+    public static final String BOTTOM_SHEET_TEXT = "BOTTOM_SHEET_TEXT";
+    public static final String BOTTOM_SHEET_BUTTON = "BOTTOM_SHEET_BUTTON";
+
+    public static final String BOTTOM_SHEET_TAG = "dialog_fragment";
+
 }
