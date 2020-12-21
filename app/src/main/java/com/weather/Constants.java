@@ -8,7 +8,7 @@ public class Constants {
     public static final String API_CITY_ID_NAME = "id";
 
     //!!!!!!
-    public static final String API_KEY = "c5edeba6029bbb355ce6f660300369c2";
+    public static final String API_KEY = "your api key";
     //!!!!!!
 
     public static final String API_LANGUAGE_NAME = "lang";
