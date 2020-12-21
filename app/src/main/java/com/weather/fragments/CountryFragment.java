@@ -20,10 +20,19 @@ import android.widget.TextView;
 import com.weather.Constants;
 import com.weather.MainActivity;
 import com.weather.R;
+import com.weather.bottomsheet.BottomSheetCreator;
 import com.weather.model.RequestApi;
 import com.weather.model.service.RequestIntentService;
+import com.weather.model.weather.RetrofitRequest;
+import com.weather.model.weather.WeatherRequest;
 
 import java.net.HttpURLConnection;
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class CountryFragment extends Fragment {
 
@@ -78,43 +87,36 @@ public class CountryFragment extends Fragment {
 
         imageViewEdit.setOnClickListener(v -> mainActivity.pushFragments(new SearchFragment(), true, null));
 
-        RequestIntentService.startIntentService(getContext(), currentParcel.getCityId());
 
-/*        requestApi = new RequestApi.Builder(Constants.URL_CONNECTION)
-                .requestType(RequestApi.Type.GET)
-                .addPar(Constants.API_UNITS_NAME, Constants.API_UNITS_METRIC)
-                .addPar(Constants.API_LANGUAGE_NAME, Locale.getDefault().getCountry())
-                .addPar(Constants.API_CITY_ID_NAME, currentParcel.getCityId())
-                .addPar(Constants.API_KEY_NAME, Constants.API_KEY)
-                .setOnRequestApiListener(new RequestApi.OnRequestApiListener() {
-                    @Override
-                    public void onSuccess(@Nullable String result, int responseCode) {
-                        if(responseCode == HttpURLConnection.HTTP_OK) {
-                            WeatherRequest weatherRequest = new WeatherParser(result).getWeatherRequest();
+        RetrofitRequest.getOpenWeather().getWeather(Constants.API_UNITS_METRIC, Locale.getDefault().getCountry(),
+                currentParcel.getCityId(), Constants.API_KEY).enqueue(new Callback<WeatherRequest>() {
+            @Override
+            public void onResponse(Call<WeatherRequest> call, Response<WeatherRequest> response) {
+                WeatherRequest weatherRequest = response.body();
+                if(response.isSuccessful()){
+                    currentParcel.setCityName(weatherRequest.getName());
 
-                            currentParcel.setCityName(weatherRequest.getName());
+                    textViewCountry.setText(weatherRequest.getName());
+                    mainActivity.setCountryText(weatherRequest.getName());
 
-                            textViewCountry.setText(weatherRequest.getName());
-                            mainActivity.setCountryText(weatherRequest.getName());
+                    textViewType.setText(firstUpperCase(weatherRequest.getWeather()[0].getDescription()));
 
-                            textViewType.setText(firstUpperCase(weatherRequest.getWeather()[0].getDescription()));
+                    textViewTemp.setText(String.valueOf(weatherRequest.getMain().getTemp()));
 
-                            textViewTemp.setText(String.valueOf(weatherRequest.getMain().getTemp()));
+                    textViewPressure.setText(String.valueOf(weatherRequest.getMain().getPressure()));
 
-                            textViewPressure.setText(String.valueOf(weatherRequest.getMain().getPressure()));
+                    textViewWind.setText(String.valueOf(weatherRequest.getWind().getSpeed()));
+                } else {
+                    BottomSheetCreator.show(getContext(), getString(R.string.toast_request_error));
+                }
+            }
 
-                            textViewWind.setText(String.valueOf(weatherRequest.getWind().getSpeed()));
-                        } else {
-                            BottomSheetCreator.show(getContext(), getString(R.string.toast_request_error));
-                        }
+            @Override
+            public void onFailure(Call<WeatherRequest> call, Throwable t) {
+                BottomSheetCreator.show(getContext(), getString(R.string.toast_request_no_data));
+            }
+        });
 
-                    }
-
-                    @Override
-                    public void onError() {
-                        BottomSheetCreator.show(getContext(), getString(R.string.toast_request_no_data));
-                    }
-                }).build();*/
     }
 
     @Override
