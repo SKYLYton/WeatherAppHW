@@ -41,4 +41,18 @@ public class Constants {
 
     public static final String BOTTOM_SHEET_TAG = "dialog_fragment";
 
+    public static final String BROADCAST_ACTION_REQUEST = "BROADCAST_ACTION_REQUEST";
+
+    public static final String BROADCAST_EXTRA_CITY_NAME = "BROADCAST_EXTRA_CITY_NAME";
+    public static final String BROADCAST_EXTRA_CITY_TYPE = "BROADCAST_EXTRA_CITY_TYPE";
+    public static final String BROADCAST_EXTRA_CITY_TEMP = "BROADCAST_EXTRA_CITY_TEMP";
+    public static final String BROADCAST_EXTRA_CITY_PRESSURE = "BROADCAST_EXTRA_CITY_PRESSURE";
+    public static final String BROADCAST_EXTRA_CITY_WIND = "BROADCAST_EXTRA_CITY_WIND";
+
+    public static final String SERVICE_CITY_ID = "SERVICE_CITY_ID";
+
+    public static final String SERVICE_REQUEST_CODE = "SERVICE_REQUEST_CODE";
+
+
+
 }

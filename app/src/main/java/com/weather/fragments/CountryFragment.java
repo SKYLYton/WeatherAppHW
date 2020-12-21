@@ -1,31 +1,29 @@
 package com.weather.fragments;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.weather.Constants;
 import com.weather.MainActivity;
 import com.weather.R;
-import com.weather.bottomsheet.BottomSheetCreator;
-import com.weather.bottomsheet.NotificationBottomSheetDialog;
 import com.weather.model.RequestApi;
-import com.weather.model.weather.WeatherParser;
-import com.weather.model.weather.WeatherRequest;
+import com.weather.model.service.RequestIntentService;
 
 import java.net.HttpURLConnection;
-import java.util.Locale;
 
 public class CountryFragment extends Fragment {
 
@@ -35,6 +33,10 @@ public class CountryFragment extends Fragment {
     private Parcel currentParcel;
     private MainActivity mainActivity;
     private RequestApi requestApi;
+    private TextView textViewType;
+    private TextView textViewTemp;
+    private TextView textViewPressure;
+    private TextView textViewWind;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -66,17 +68,19 @@ public class CountryFragment extends Fragment {
     private void init(View view) {
 
         textViewCountry = view.findViewById(R.id.textViewCountry);
-        TextView textViewType = view.findViewById(R.id.textViewType);
-        TextView textViewTemp = view.findViewById(R.id.textViewTemp);
-        TextView textViewPressure = view.findViewById(R.id.textViewPress);
-        TextView textViewWind = view.findViewById(R.id.textViewWind);
+        textViewType = view.findViewById(R.id.textViewType);
+        textViewTemp = view.findViewById(R.id.textViewTemp);
+        textViewPressure = view.findViewById(R.id.textViewPress);
+        textViewWind = view.findViewById(R.id.textViewWind);
 
 
         ImageButton imageViewEdit = view.findViewById(R.id.imageButton);
 
         imageViewEdit.setOnClickListener(v -> mainActivity.pushFragments(new SearchFragment(), true, null));
 
-        requestApi = new RequestApi.Builder(Constants.URL_CONNECTION)
+        RequestIntentService.startIntentService(getContext(), currentParcel.getCityId());
+
+/*        requestApi = new RequestApi.Builder(Constants.URL_CONNECTION)
                 .requestType(RequestApi.Type.GET)
                 .addPar(Constants.API_UNITS_NAME, Constants.API_UNITS_METRIC)
                 .addPar(Constants.API_LANGUAGE_NAME, Locale.getDefault().getCountry())
@@ -110,8 +114,21 @@ public class CountryFragment extends Fragment {
                     public void onError() {
                         BottomSheetCreator.show(getContext(), getString(R.string.toast_request_no_data));
                     }
-                }).build();
+                }).build();*/
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mainActivity.registerReceiver(broadcastReceiver, new IntentFilter(Constants.BROADCAST_ACTION_REQUEST));
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mainActivity.unregisterReceiver(broadcastReceiver);
+    }
+
 
     public String firstUpperCase(String word){
         if(word == null || word.isEmpty()) return "";
@@ -121,5 +138,40 @@ public class CountryFragment extends Fragment {
     public Parcel getCurrentParcel() {
         return currentParcel;
     }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int code = intent.getIntExtra(Constants.SERVICE_REQUEST_CODE, 0);
+
+            if(code == HttpURLConnection.HTTP_OK) {
+
+                String name = intent.getStringExtra(Constants.BROADCAST_EXTRA_CITY_NAME);
+                String type = intent.getStringExtra(Constants.BROADCAST_EXTRA_CITY_TYPE);
+                float temp = intent.getFloatExtra(Constants.BROADCAST_EXTRA_CITY_TEMP, 0f);
+                int pressure = intent.getIntExtra(Constants.BROADCAST_EXTRA_CITY_PRESSURE, 0);
+                float wind = intent.getFloatExtra(Constants.BROADCAST_EXTRA_CITY_WIND, 0f);
+
+                mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        currentParcel.setCityName(name);
+
+                        textViewCountry.setText(name);
+                        mainActivity.setCountryText(name);
+
+                        textViewType.setText(firstUpperCase(type));
+
+                        textViewTemp.setText(String.valueOf(temp));
+
+                        textViewPressure.setText(String.valueOf(pressure));
+
+                        textViewWind.setText(String.valueOf(wind));
+                    }
+                });
+            }
+        }
+    };
+
 
 }
