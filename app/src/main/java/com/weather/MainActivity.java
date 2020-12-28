@@ -2,20 +2,26 @@ package com.weather;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.weather.bottomsheet.BottomSheetCreator;
 import com.weather.fragments.AboutFragment;
 import com.weather.fragments.CountryFragment;
 import com.weather.fragments.SettingsFragment;
+import com.weather.receivers.NetworkReceiver;
+import com.weather.receivers.PowerConnectionReceiver;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -37,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    private NetworkReceiver networkReceiver;
+    private PowerConnectionReceiver powerConnectionReceiver;
     private long mLastClickTime;
     private static final String TAB_MAIN = "tab_main";
     private static final String TAB_ABOUT = "tab_about";
@@ -111,6 +119,48 @@ public class MainActivity extends AppCompatActivity {
             Toolbar toolbar = initToolbar();
             initNavView(toolbar);
         }
+
+        initBroadcastReceiverNetwork();
+        initBroadcastReceiverPower();
+    }
+
+    private void initBroadcastReceiverNetwork(){
+        ImageView imageViewNetwork = findViewById(R.id.imageViewNetwork);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Constants.CONNECTIVITY_ACTION);
+        networkReceiver = new NetworkReceiver();
+        registerReceiver(networkReceiver, intentFilter);
+        networkReceiver.setOnNetworkStateListener(isConnected ->
+                imageViewNetwork.setImageResource(isConnected ? R.drawable.ic_signal : R.drawable.ic_no_signal));
+    }
+
+    private void initBroadcastReceiverPower(){
+        ImageView imageViewBattery = findViewById(R.id.imageViewBattery);
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+
+        powerConnectionReceiver = new PowerConnectionReceiver();
+        registerReceiver(powerConnectionReceiver, intentFilter);
+        powerConnectionReceiver.setOnPowerStateListener(new PowerConnectionReceiver.OnPowerStateListener() {
+            @Override
+            public void onCharging() {
+                imageViewBattery.setImageResource(R.drawable.ic_battery_charging);
+            }
+
+            @Override
+            public void onNormalLevel() {
+                imageViewBattery.setImageResource(R.drawable.ic_battery_full);
+            }
+
+            @Override
+            public void onLowLevel() {
+                imageViewBattery.setImageResource(R.drawable.ic_battery_alert);
+            }
+
+            @Override
+            public void onCriticalLowLevel() {
+                imageViewBattery.setImageResource(R.drawable.ic_battery_low);
+            }
+        });
     }
 
     @Override
@@ -361,7 +411,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
             return;
         }
@@ -374,5 +424,10 @@ public class MainActivity extends AppCompatActivity {
         popFragments();
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkReceiver);
+        unregisterReceiver(powerConnectionReceiver);
+    }
 }

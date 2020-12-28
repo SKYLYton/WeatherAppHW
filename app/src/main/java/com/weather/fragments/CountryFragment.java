@@ -22,7 +22,6 @@ import com.weather.MainActivity;
 import com.weather.R;
 import com.weather.bottomsheet.BottomSheetCreator;
 import com.weather.model.RequestApi;
-import com.weather.model.service.RequestIntentService;
 import com.weather.model.weather.RetrofitRequest;
 import com.weather.model.weather.WeatherRequest;
 
