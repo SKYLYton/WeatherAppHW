@@ -2,6 +2,7 @@ package com.weather;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import com.weather.fragments.AboutFragment;
 import com.weather.fragments.CountryFragment;
 import com.weather.fragments.SettingsFragment;
 import com.weather.receivers.NetworkReceiver;
+import com.weather.receivers.PowerConnectionReceiver;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private NetworkReceiver networkReceiver;
-
+    private PowerConnectionReceiver powerConnectionReceiver;
     private long mLastClickTime;
     private static final String TAB_MAIN = "tab_main";
     private static final String TAB_ABOUT = "tab_about";
@@ -119,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         initBroadcastReceiverNetwork();
+        initBroadcastReceiverPower();
     }
 
     private void initBroadcastReceiverNetwork(){
@@ -129,6 +132,35 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(networkReceiver, intentFilter);
         networkReceiver.setOnNetworkStateListener(isConnected ->
                 imageViewNetwork.setImageResource(isConnected ? R.drawable.ic_signal : R.drawable.ic_no_signal));
+    }
+
+    private void initBroadcastReceiverPower(){
+        ImageView imageViewBattery = findViewById(R.id.imageViewBattery);
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+
+        powerConnectionReceiver = new PowerConnectionReceiver();
+        registerReceiver(powerConnectionReceiver, intentFilter);
+        powerConnectionReceiver.setOnPowerStateListener(new PowerConnectionReceiver.OnPowerStateListener() {
+            @Override
+            public void onCharging() {
+                imageViewBattery.setImageResource(R.drawable.ic_battery_charging);
+            }
+
+            @Override
+            public void onNormalLevel() {
+                imageViewBattery.setImageResource(R.drawable.ic_battery_full);
+            }
+
+            @Override
+            public void onLowLevel() {
+                imageViewBattery.setImageResource(R.drawable.ic_battery_alert);
+            }
+
+            @Override
+            public void onCriticalLowLevel() {
+                imageViewBattery.setImageResource(R.drawable.ic_battery_low);
+            }
+        });
     }
 
     @Override
@@ -396,5 +428,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(networkReceiver);
+        unregisterReceiver(powerConnectionReceiver);
     }
 }

@@ -34,6 +34,8 @@ public class Constants {
     public static final String SHARED_SIDE_MENU = "SLIDE_MENU";
     public static final String SHARED_BOTTOM_MENU = "BOTTOM_MENU";
 
+
+
     public static final String CURRENT_PARCEL = "CURRENT_PARCEL";
 
     public static final String FILE_CITIES_NAME = "cityList.json";
