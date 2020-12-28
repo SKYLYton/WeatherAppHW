@@ -4,6 +4,8 @@ public class Constants {
     public static final boolean VERBOSE = true;
     public static final boolean DEBUG = VERBOSE && true;
 
+    public final static String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
+
     public static final String API_KEY_NAME = "appid";
     public static final String API_CITY_ID_NAME = "id";
 

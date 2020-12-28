@@ -31,12 +31,13 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private boolean isChangedTheme(){
+        Log.e("dfdfdf", "dfdf");
         if (sharedPreferences.getBoolean(Constants.SHARED_THEME_IS_DARK, false) &&
                 AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES) {
             setTheme(true);
             return true;
         } else if (!sharedPreferences.getBoolean(Constants.SHARED_THEME_IS_DARK, false) &&
-                AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
+                AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO) {
             setTheme(false);
             return true;
         }

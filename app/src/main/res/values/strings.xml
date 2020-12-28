@@ -39,6 +39,8 @@
     <string name="toast_inf_empty_field">Fill in the empty fields</string>
     <string name="toast_request_no_data">Check your Internet connection</string>
     <string name="toast_request_error">Couldn\'t get data from the server</string>
+    <string name="toast_inf_offline">Lost Internet connection</string>
+    <string name="toast_inf_online">An Internet connection has appeared</string>
 
     //days
     <string name="today">Today</string>
