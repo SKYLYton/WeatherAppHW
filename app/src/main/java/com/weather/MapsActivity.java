@@ -1,8 +1,12 @@
 package com.weather;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
@@ -39,7 +43,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GPSTracker gpsTracker;
     private Marker currentLocation;
     private boolean accessLocation;
+    private boolean isGPSLocationOn = true;
     private FloatingActionButton floatingActionButtonChoose;
+    private FloatingActionButton floatingActionButtonLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void initControls() {
         floatingActionButtonChoose = findViewById(R.id.floatingActionButtonChoose);
+        floatingActionButtonLocation = findViewById(R.id.floatingActionButtonLocation);
 
         floatingActionButtonChoose.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,18 +76,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 finish();
             }
         });
-    }
 
-    private void initGPSTracker() {
-        gpsTracker = new GPSTracker(getApplicationContext());
-        gpsTracker.setOnLocationUpdate(new GPSTracker.OnLocationUpdate() {
+        floatingActionButtonLocation.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void OnUpdate(Location location, LatLng latLng) {
+            public void onClick(View v) {
+                isGPSLocationOn = true;
+
+                if(!gpsTracker.isLocationKnown()){
+                    mMap.clear();
+                }
+
+                LatLng latLng = new LatLng(gpsTracker.getLatitude(), gpsTracker.getLongitude());
                 floatingActionButtonChoose.setVisibility(View.VISIBLE);
+                floatingActionButtonLocation.setVisibility(View.GONE);
                 if (currentLocation == null) {
                     currentLocation = mMap.addMarker(new MarkerOptions()
                             .position(latLng)
-                            .icon(bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_location)));
+                            .draggable(true)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
                 } else {
                     currentLocation.setPosition(latLng);
                 }
@@ -89,18 +102,68 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
-        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
-        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
-        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        vectorDrawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    private void initGPSTracker() {
+        gpsTracker = new GPSTracker(getApplicationContext());
+        gpsTracker.setOnLocationUpdate(new GPSTracker.OnLocationUpdate() {
+            @Override
+            public void OnUpdate(Location location, LatLng latLng) {
+                if (!isGPSLocationOn) {
+                    return;
+                }
+
+                if (currentLocation == null) {
+                    floatingActionButtonChoose.setVisibility(View.VISIBLE);
+                    floatingActionButtonLocation.setVisibility(View.GONE);
+                    currentLocation = mMap.addMarker(new MarkerOptions()
+                            .position(latLng)
+                            .draggable(true)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+                } else {
+                    currentLocation.setPosition(latLng);
+                }
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 5f));
+            }
+        });
     }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                floatingActionButtonLocation.setVisibility(View.VISIBLE);
+                isGPSLocationOn = false;
+                if (currentLocation == null) {
+                    currentLocation = mMap.addMarker(new MarkerOptions()
+                            .position(latLng)
+                            .draggable(true)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+                } else {
+                    currentLocation.setPosition(latLng);
+                }
+            }
+        });
+
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+                floatingActionButtonLocation.setVisibility(View.VISIBLE);
+                isGPSLocationOn = false;
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+
+            }
+        });
     }
 
     private boolean checkPermission() {

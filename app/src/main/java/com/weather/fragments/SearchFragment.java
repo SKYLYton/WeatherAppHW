@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -13,11 +15,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
@@ -37,6 +39,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -138,9 +141,9 @@ public class SearchFragment extends Fragment {
         thread.start();
 
         citiesWeatherAdapter.setOnItemSelect((cityId, cityName) -> {
-            editor.putBoolean(Constants.SHARED_IS_COUNTRY_EMPTY, false);
             editor.putString(Constants.SHARED_COUNTRY_NAME, cityName);
             editor.putInt(Constants.SHARED_COUNTRY_ID, cityId);
+            editor.putBoolean(Constants.SHARED_TYPE_CORD, false);
             editor.apply();
 
             mainActivity.changeCountry(cityId, cityName);
@@ -185,6 +188,29 @@ public class SearchFragment extends Fragment {
             if(resultCode == RESULT_OK){
                 double lat = data.getDoubleExtra(Constants.EXTRA_LAT, 0f);
                 double lng = data.getDoubleExtra(Constants.EXTRA_LNG, 0f);
+
+                editor.putFloat(Constants.SHARED_LAT, (float) lat);
+                editor.putFloat(Constants.SHARED_LNG, (float) lng);
+                editor.putBoolean(Constants.SHARED_TYPE_CORD, true);
+                editor.commit();
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Geocoder gcd = new Geocoder(mainActivity, Locale.getDefault());
+                        List<Address> addresses = null;
+                        try {
+                            addresses = gcd.getFromLocation(lat, lng, 1);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        if (addresses.size() > 0) {
+                            editor.putString(Constants.SHARED_COUNTRY_NAME, addresses.get(0).getLocality());
+                            editor.commit();
+                        }
+                    }
+                }).start();
+
                 mainActivity.changeCountry(lat, lng);
                 mainActivity.onBackPressed();
             }

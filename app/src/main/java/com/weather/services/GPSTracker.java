@@ -98,6 +98,10 @@ public class GPSTracker {
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
+    public boolean isLocationKnown(){
+        return location != null;
+    }
+
     public double getLatitude() {
         return latitude;
     }

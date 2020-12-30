@@ -26,9 +26,24 @@
         android:clickable="true"
         android:visibility="gone"
         map:backgroundTint="@color/blue"
-        map:fabSize="mini"
+        map:fabSize="normal"
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent"
         map:srcCompat="@drawable/ic_add_location"
+        map:tint="@color/white" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButtonLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        android:visibility="gone"
+        map:backgroundTint="@color/blue"
+        map:fabSize="normal"
+        map:layout_constraintBottom_toBottomOf="parent"
+        map:layout_constraintStart_toStartOf="parent"
+        map:srcCompat="@drawable/ic_my_location"
         map:tint="@color/white" />
 </androidx.constraintlayout.widget.ConstraintLayout>

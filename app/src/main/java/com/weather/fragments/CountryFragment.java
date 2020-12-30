@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -17,8 +16,8 @@ import android.widget.TextView;
 import com.weather.Constants;
 import com.weather.MainActivity;
 import com.weather.R;
+import com.weather.SelectedLocation;
 import com.weather.bottomsheet.BottomSheetCreator;
-import com.weather.model.RequestApi;
 import com.weather.model.weather.RetrofitRequest;
 import com.weather.model.weather.WeatherRequest;
 
@@ -33,9 +32,8 @@ public class CountryFragment extends Fragment {
     private TextView textViewCountry;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
-    private Parcel currentParcel;
+    private SelectedLocation selectedLocation;
     private MainActivity mainActivity;
-    private RequestApi requestApi;
     private TextView textViewType;
     private TextView textViewTemp;
     private TextView textViewPressure;
@@ -51,22 +49,12 @@ public class CountryFragment extends Fragment {
         sharedPreferences = getContext().getSharedPreferences(Constants.MAIN_SHARED_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
-        if (mainActivity.getParcel() != null) {
-            currentParcel = mainActivity.getParcel();
-        } else {
-            String nameCity = sharedPreferences.getString(Constants.SHARED_COUNTRY_NAME, getResources().getStringArray(R.array.cities)[0]);
-            currentParcel = new Parcel(nameCity, mainActivity.getCurrentCityId());
-        }
+
+        selectedLocation = mainActivity.getSelectedLocation();
 
         init(view);
 
         return view;
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putParcelable(Constants.CURRENT_PARCEL, currentParcel);
-        super.onSaveInstanceState(outState);
     }
 
     private void init(View view) {
@@ -81,12 +69,13 @@ public class CountryFragment extends Fragment {
 
         imageViewEdit.setOnClickListener(v -> mainActivity.pushFragments(new SearchFragment(), true, null));
 
-        if(currentParcel.isCord()){
+        if (selectedLocation.isCord()) {
+            Log.e("dsd", "true");
             RetrofitRequest.getOpenWeather().getWeather(Constants.API_UNITS_METRIC, Locale.getDefault().getCountry(),
-                    currentParcel.getLat(), currentParcel.getLng(), Constants.API_KEY).enqueue(callback);
+                    selectedLocation.getLat(), selectedLocation.getLng(), Constants.API_KEY).enqueue(callback);
         } else {
             RetrofitRequest.getOpenWeather().getWeather(Constants.API_UNITS_METRIC, Locale.getDefault().getCountry(),
-                    currentParcel.getCityId(), Constants.API_KEY).enqueue(callback);
+                    selectedLocation.getCityId(), Constants.API_KEY).enqueue(callback);
         }
 
     }
@@ -96,10 +85,11 @@ public class CountryFragment extends Fragment {
         public void onResponse(Call<WeatherRequest> call, Response<WeatherRequest> response) {
             WeatherRequest weatherRequest = response.body();
             if (response.isSuccessful()) {
-                currentParcel.setCityName(weatherRequest.getName());
+                String cityName = weatherRequest.getName();
+                selectedLocation.setCityName(cityName);
 
-                textViewCountry.setText(weatherRequest.getName());
-                mainActivity.setCountryText(weatherRequest.getName());
+                textViewCountry.setText(cityName);
+                mainActivity.setCountryText(cityName);
 
                 textViewType.setText(firstUpperCase(weatherRequest.getWeather()[0].getDescription()));
 
@@ -119,13 +109,8 @@ public class CountryFragment extends Fragment {
         }
     };
 
-    public String firstUpperCase(String word){
-        if(word == null || word.isEmpty()) return "";
+    public String firstUpperCase(String word) {
+        if (word == null || word.isEmpty()) return "";
         return word.substring(0, 1).toUpperCase() + word.substring(1);
     }
-
-    public Parcel getCurrentParcel() {
-        return currentParcel;
-    }
-
 }
