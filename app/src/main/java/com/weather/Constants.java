@@ -57,6 +57,6 @@ public class Constants {
 
     public static final String SERVICE_REQUEST_CODE = "SERVICE_REQUEST_CODE";
 
-
-
+    public static final String EXTRA_LAT = "EXTRA_LAT";
+    public static final String EXTRA_LNG = "EXTRA_LONG";
 }

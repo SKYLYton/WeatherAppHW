@@ -19,6 +19,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.weather.bottomsheet.BottomSheetCreator;
 import com.weather.fragments.AboutFragment;
 import com.weather.fragments.CountryFragment;
+import com.weather.fragments.Parcel;
 import com.weather.fragments.SettingsFragment;
 import com.weather.receivers.NetworkReceiver;
 import com.weather.receivers.PowerConnectionReceiver;
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewCountry;
     private DrawerLayout drawer;
     private NavigationView navigationView;
+    private Parcel parcel;
 
     public int getCurrentCityId() {
         return currentCityId;
@@ -92,6 +94,10 @@ public class MainActivity extends AppCompatActivity {
 
         sharedPreferences = getSharedPreferences(Constants.MAIN_SHARED_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
+
+        String currentCountry = sharedPreferences.getString(Constants.SHARED_COUNTRY_NAME, getResources().getStringArray(R.array.cities)[0]);
+
+        parcel = new Parcel(currentCountry, getCurrentCityId(), false);
 
         isSideMenu = sharedPreferences.getString(Constants.SHARED_MENU_TYPE, Constants.SHARED_SIDE_MENU).equals(Constants.SHARED_SIDE_MENU);
 
@@ -361,9 +367,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void changeCountry(int id, String country) {
-        countryFragment.getCurrentParcel().setCityName(country);
-        countryFragment.getCurrentParcel().setCityId(id);
+        parcel.setCityName(country);
+        parcel.setCityId(id);
+        parcel.setLat(0f);
+        parcel.setLng(0f);
         currentCityId = id;
+        parcel.setCord(false);
+    }
+
+    public void changeCountry(double lat, double lng) {
+        parcel.setCityName("");
+        parcel.setCityId(0);
+        parcel.setLat(lat);
+        parcel.setLng(lng);
+        parcel.setCord(true);
+    }
+
+    public Parcel getParcel() {
+        return parcel;
     }
 
     public void popFragments() {

@@ -2,6 +2,7 @@ package com.weather.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -16,11 +17,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.weather.Constants;
 import com.weather.MainActivity;
+import com.weather.MapsActivity;
 import com.weather.R;
 import com.weather.adapters.CitiesWeatherAdapter;
 import com.weather.adapters.CityItem;
@@ -35,13 +38,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.app.Activity.RESULT_OK;
+
 public class SearchFragment extends Fragment {
 
+    private static final int RESULT_CHOOSE_LOCATION_CODE = 0;
     private List<CityItem> cityItems = new ArrayList<>();
     private MainActivity mainActivity;
     private CitiesWeatherAdapter citiesWeatherAdapter;
     private List<CityModel> cityModelList;
     private SharedPreferences.Editor editor;
+    private Thread thread;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -60,21 +67,17 @@ public class SearchFragment extends Fragment {
         editor = sharedPreferences.edit();
 
         citiesWeatherAdapter = initDaysWeatherList(view);
-
         EditText editTextCountry = view.findViewById(R.id.editTextCountry);
-
         FloatingActionButton floatingActionButton = view.findViewById(R.id.floatingActionButton);
-
+        FloatingActionButton floatingActionButtonMap = view.findViewById(R.id.floatingActionButtonMap);
 
         editTextCountry.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
 
             @Override
@@ -94,6 +97,13 @@ public class SearchFragment extends Fragment {
         });
 
         floatingActionButton.setOnClickListener(v -> mainActivity.onBackPressed());
+
+        floatingActionButtonMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(new Intent(getContext(), MapsActivity.class), RESULT_CHOOSE_LOCATION_CODE);
+            }
+        });
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
@@ -104,7 +114,7 @@ public class SearchFragment extends Fragment {
         itemDecoration.setDrawable(view.getContext().getDrawable(R.drawable.separator));
         recyclerView.addItemDecoration(itemDecoration);
         CitiesWeatherAdapter citiesWeatherAdapter = new CitiesWeatherAdapter(cityItems);
-        new Thread(new Runnable() {
+        thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 Gson gson = new Gson();
@@ -118,14 +128,14 @@ public class SearchFragment extends Fragment {
                 }
 
                 mainActivity.runOnUiThread(new Runnable() {
-
                     @Override
                     public void run() {
                         recyclerView.setAdapter(citiesWeatherAdapter);
                     }
                 });
             }
-        }).start();
+        });
+        thread.start();
 
         citiesWeatherAdapter.setOnItemSelect((cityId, cityName) -> {
             editor.putBoolean(Constants.SHARED_IS_COUNTRY_EMPTY, false);
@@ -141,10 +151,11 @@ public class SearchFragment extends Fragment {
     }
 
     private String getCities(){
+
         StringBuilder buf = new StringBuilder();
         InputStream json = null;
         try {
-            json = getContext().getAssets().open(Constants.FILE_CITIES_NAME);
+            json = mainActivity.getAssets().open(Constants.FILE_CITIES_NAME);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -166,5 +177,18 @@ public class SearchFragment extends Fragment {
             e.printStackTrace();
         }
         return buf.toString();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RESULT_CHOOSE_LOCATION_CODE) {
+            if(resultCode == RESULT_OK){
+                double lat = data.getDoubleExtra(Constants.EXTRA_LAT, 0f);
+                double lng = data.getDoubleExtra(Constants.EXTRA_LNG, 0f);
+                mainActivity.changeCountry(lat, lng);
+                mainActivity.onBackPressed();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
