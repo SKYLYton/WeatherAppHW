@@ -71,10 +71,12 @@ public class CountryFragment extends Fragment {
 
         if (selectedLocation.isCord()) {
             Log.e("dsd", "true");
-            RetrofitRequest.getOpenWeather().getWeather(Constants.API_UNITS_METRIC, Locale.getDefault().getCountry(),
+            RetrofitRequest.getInstance()
+                    .getOpenWeather().getWeather(Constants.API_UNITS_METRIC, Locale.getDefault().getCountry(),
                     selectedLocation.getLat(), selectedLocation.getLng(), Constants.API_KEY).enqueue(callback);
         } else {
-            RetrofitRequest.getOpenWeather().getWeather(Constants.API_UNITS_METRIC, Locale.getDefault().getCountry(),
+            RetrofitRequest.getInstance()
+                    .getOpenWeather().getWeather(Constants.API_UNITS_METRIC, Locale.getDefault().getCountry(),
                     selectedLocation.getCityId(), Constants.API_KEY).enqueue(callback);
         }
 

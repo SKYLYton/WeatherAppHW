@@ -203,6 +203,7 @@ public class SearchFragment extends Fragment {
                             addresses = gcd.getFromLocation(lat, lng, 1);
                         } catch (IOException e) {
                             e.printStackTrace();
+                            return;
                         }
                         if (addresses.size() > 0) {
                             editor.putString(Constants.SHARED_COUNTRY_NAME, addresses.get(0).getLocality());
