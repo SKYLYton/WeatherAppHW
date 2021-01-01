@@ -1,19 +1,34 @@
 package com.weather.model.weather;
 
+import com.weather.Constants;
 import com.weather.model.OpenWeather;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitRequest {
-    public static OpenWeather getOpenWeather(){
-        Retrofit retrofit;
-        retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.openweathermap.org/")
+
+    private static final RetrofitRequest INSTANCE;
+    private final OpenWeather OPEN_WEATHER;
+
+    static {
+        INSTANCE = new RetrofitRequest();
+    }
+
+    private RetrofitRequest() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Constants.URL_CONNECTION)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+        OPEN_WEATHER = retrofit.create(OpenWeather.class);
+    }
 
-        OpenWeather openWeather = retrofit.create(OpenWeather.class);
-        return openWeather;
+    public static RetrofitRequest getInstance() {
+        return INSTANCE;
+    }
+
+
+    public OpenWeather getOpenWeather(){
+        return OPEN_WEATHER;
     }
 }

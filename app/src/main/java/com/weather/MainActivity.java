@@ -15,8 +15,6 @@ import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
-import com.weather.bottomsheet.BottomSheetCreator;
 import com.weather.fragments.AboutFragment;
 import com.weather.fragments.CountryFragment;
 import com.weather.fragments.SettingsFragment;
@@ -27,7 +25,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -58,30 +55,23 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private MainParcel currentMainParcel;
-    private CountryFragment countryFragment;
     private boolean isSideMenu = false;
-    private int currentCityId;
     private String currentCountryText;
     private TextView textViewCountry;
     private DrawerLayout drawer;
     private NavigationView navigationView;
+    private SelectedLocation selectedLocation;
 
-    public int getCurrentCityId() {
-        return currentCityId;
-    }
-
-    public void setCountryText(String countryText){
+    public void setCountryText(String countryText) {
         currentMainParcel.setCurrentCountry(countryText);
-        if(isSideMenu) {
+        if (isSideMenu) {
             textViewCountry.setText(countryText);
         }
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-
         outState.putParcelable(Constants.CURRENT_PARCEL, currentMainParcel);
-
         super.onSaveInstanceState(outState);
     }
 
@@ -93,13 +83,9 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences(Constants.MAIN_SHARED_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
-        isSideMenu = sharedPreferences.getString(Constants.SHARED_MENU_TYPE, Constants.SHARED_SIDE_MENU).equals(Constants.SHARED_SIDE_MENU);
+        getSavedData();
 
-        if (isSideMenu) {
-            setContentView(R.layout.activity_side_menu);
-        } else {
-            setContentView(R.layout.activity_main);
-        }
+        setContentView(isSideMenu ? R.layout.activity_side_menu : R.layout.activity_main);
 
         if (savedInstanceState != null) {
             currentMainParcel = (MainParcel) savedInstanceState.getParcelable(Constants.CURRENT_PARCEL);
@@ -110,10 +96,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         frgManager = getSupportFragmentManager();
-        currentCityId = sharedPreferences.getInt(Constants.SHARED_COUNTRY_ID, Constants.DEFAULT_CITY_ID);
 
         initStack();
-        if(!isSideMenu) {
+
+        if (!isSideMenu) {
             initBottomNavView();
         } else {
             Toolbar toolbar = initToolbar();
@@ -124,7 +110,23 @@ public class MainActivity extends AppCompatActivity {
         initBroadcastReceiverPower();
     }
 
-    private void initBroadcastReceiverNetwork(){
+    private void getSavedData() {
+        boolean isCord = sharedPreferences.getBoolean(Constants.SHARED_TYPE_CORD, false);
+        String nameCity = sharedPreferences.getString(Constants.SHARED_COUNTRY_NAME, getResources().getStringArray(R.array.cities)[0]);
+
+        if(isCord) {
+            double lat = sharedPreferences.getFloat(Constants.SHARED_LAT, 0f);
+            double lng = sharedPreferences.getFloat(Constants.SHARED_LNG, 0f);
+            selectedLocation = new SelectedLocation(lat, lng, isCord, nameCity);
+        } else {
+            int currentCityId = sharedPreferences.getInt(Constants.SHARED_COUNTRY_ID, Constants.DEFAULT_CITY_ID);
+            selectedLocation = new SelectedLocation(nameCity, currentCityId);
+        }
+
+        isSideMenu = sharedPreferences.getString(Constants.SHARED_MENU_TYPE, Constants.SHARED_SIDE_MENU).equals(Constants.SHARED_SIDE_MENU);
+    }
+
+    private void initBroadcastReceiverNetwork() {
         ImageView imageViewNetwork = findViewById(R.id.imageViewNetwork);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Constants.CONNECTIVITY_ACTION);
@@ -134,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                 imageViewNetwork.setImageResource(isConnected ? R.drawable.ic_signal : R.drawable.ic_no_signal));
     }
 
-    private void initBroadcastReceiverPower(){
+    private void initBroadcastReceiverPower() {
         ImageView imageViewBattery = findViewById(R.id.imageViewBattery);
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 
@@ -173,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         settings.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if(isSideMenu){
+                if (isSideMenu) {
                     setCurrentTab(TAB_SETTINGS);
                     setSelectedItemNavView(TAB_SETTINGS_ID);
                     selectedTab();
@@ -185,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void initStack(){
+    private void initStack() {
         if (mStacks == null) {
             mStacks = new HashMap<String, Stack<Fragment>>();
             mStacks.put(TAB_MAIN, new Stack<Fragment>());
@@ -215,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                if(selectedItem(item)){
+                if (selectedItem(item)) {
                     getSupportActionBar().setTitle(item.getTitle());
                     drawer.closeDrawer(GravityCompat.START);
                     return true;
@@ -242,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
         selectedTab();
     }
 
-    private void setSelectedItemNavView(int id){
+    private void setSelectedItemNavView(int id) {
         getSupportActionBar().setTitle(navigationView.getMenu().getItem(id).getTitle());
         navigationView.setCheckedItem(navigationView.getMenu().getItem(id));
     }
@@ -289,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("NonConstantResourceId")
-    private boolean selectedItem(MenuItem item){
+    private boolean selectedItem(MenuItem item) {
         if (SystemClock.elapsedRealtime() - mLastClickTime < 500) {
             return false;
         }
@@ -328,7 +330,6 @@ public class MainActivity extends AppCompatActivity {
             switch (getCurrentTab()) {
                 case TAB_MAIN:
                     fragment = new CountryFragment();
-                    countryFragment = (CountryFragment) fragment;
                     break;
                 case TAB_ABOUT:
                     fragment = new AboutFragment();
@@ -353,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         FragmentTransaction ft = frgManager.beginTransaction();
-        if(!isSideMenu) {
+        if (!isSideMenu) {
             ft.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out);
         }
         ft.replace(R.id.container, fragment);
@@ -361,9 +362,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void changeCountry(int id, String country) {
-        countryFragment.getCurrentParcel().setCityName(country);
-        countryFragment.getCurrentParcel().setCityId(id);
-        currentCityId = id;
+        selectedLocation.setCityName(country);
+        selectedLocation.setCityId(id);
+        selectedLocation.setLat(0f);
+        selectedLocation.setLng(0f);
+        selectedLocation.setCord(false);
+    }
+
+    public void changeCountry(double lat, double lng) {
+        selectedLocation.setCityName("");
+        selectedLocation.setCityId(0);
+        selectedLocation.setLat(lat);
+        selectedLocation.setLng(lng);
+        selectedLocation.setCord(true);
+    }
+
+    public SelectedLocation getSelectedLocation() {
+        return selectedLocation;
     }
 
     public void popFragments() {
@@ -401,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
         recreate();
     }
 
-    public boolean isSideMenu(){
+    public boolean isSideMenu() {
         return isSideMenu;
     }
 
