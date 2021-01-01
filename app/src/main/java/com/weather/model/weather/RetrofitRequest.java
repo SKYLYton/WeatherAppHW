@@ -8,28 +8,27 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitRequest {
 
-    private static RetrofitRequest instance;
-    private Retrofit retrofit;
-    private OpenWeather openWeather;
+    private static final RetrofitRequest INSTANCE;
+    private final OpenWeather OPEN_WEATHER;
 
     static {
-        instance = new RetrofitRequest();
+        INSTANCE = new RetrofitRequest();
     }
 
     private RetrofitRequest() {
-        retrofit = new Retrofit.Builder()
+        Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.URL_CONNECTION)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        openWeather = retrofit.create(OpenWeather.class);
+        OPEN_WEATHER = retrofit.create(OpenWeather.class);
     }
 
     public static RetrofitRequest getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
 
     public OpenWeather getOpenWeather(){
-        return openWeather;
+        return OPEN_WEATHER;
     }
 }
