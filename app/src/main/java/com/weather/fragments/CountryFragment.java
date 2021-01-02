@@ -18,8 +18,8 @@ import com.weather.MainActivity;
 import com.weather.R;
 import com.weather.SelectedLocation;
 import com.weather.bottomsheet.BottomSheetCreator;
-import com.weather.model.weather.RetrofitRequest;
-import com.weather.model.weather.WeatherRequest;
+import com.weather.retrofit.model.RetrofitRequest;
+import com.weather.retrofit.model.weather.WeatherRequest;
 
 import java.util.Locale;
 

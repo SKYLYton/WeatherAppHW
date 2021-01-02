@@ -1,4 +1,4 @@
-package com.weather.model.city;
+package com.weather.retrofit.model.city;
 
 import java.util.List;
 

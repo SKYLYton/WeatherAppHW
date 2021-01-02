@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,8 +28,8 @@ import com.weather.MapsActivity;
 import com.weather.R;
 import com.weather.adapters.CitiesWeatherAdapter;
 import com.weather.adapters.CityItem;
-import com.weather.model.city.CitiesModel;
-import com.weather.model.city.CityModel;
+import com.weather.retrofit.model.city.CitiesModel;
+import com.weather.retrofit.model.city.CityModel;
 
 import java.io.BufferedReader;
 import java.io.IOException;
