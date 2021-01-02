@@ -1,7 +1,6 @@
-package com.weather.model.weather;
+package com.weather.retrofit.model;
 
 import com.weather.Constants;
-import com.weather.model.OpenWeather;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -26,7 +25,6 @@ public class RetrofitRequest {
     public static RetrofitRequest getInstance() {
         return INSTANCE;
     }
-
 
     public OpenWeather getOpenWeather(){
         return OPEN_WEATHER;

@@ -1,4 +1,4 @@
-package com.weather.model.weather;
+package com.weather.retrofit.model.weather;
 
 import com.google.gson.Gson;
 

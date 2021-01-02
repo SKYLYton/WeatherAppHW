@@ -84,6 +84,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 if(!gpsTracker.isLocationKnown()){
                     mMap.clear();
+                    return;
                 }
 
                 LatLng latLng = new LatLng(gpsTracker.getLatitude(), gpsTracker.getLongitude());

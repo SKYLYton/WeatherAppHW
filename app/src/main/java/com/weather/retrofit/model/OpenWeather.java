@@ -1,6 +1,6 @@
-package com.weather.model;
+package com.weather.retrofit.model;
 
-import com.weather.model.weather.WeatherRequest;
+import com.weather.retrofit.model.weather.WeatherRequest;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

@@ -1,6 +1,6 @@
-package com.weather.model.city;
+package com.weather.retrofit.model.city;
 
-import com.weather.model.weather.Coord;
+import com.weather.retrofit.model.weather.Coord;
 
 public class CityModel {
     private int id;
