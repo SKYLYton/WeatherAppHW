@@ -30,6 +30,8 @@ import com.weather.adapters.CitiesWeatherAdapter;
 import com.weather.adapters.CityItem;
 import com.weather.retrofit.model.city.CitiesModel;
 import com.weather.retrofit.model.city.CityModel;
+import com.weather.room.model.CitiesSource;
+import com.weather.room.model.City;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -116,6 +118,13 @@ public class SearchFragment extends Fragment {
         itemDecoration.setDrawable(view.getContext().getDrawable(R.drawable.separator));
         recyclerView.addItemDecoration(itemDecoration);
         CitiesWeatherAdapter citiesWeatherAdapter = new CitiesWeatherAdapter(cityItems);
+
+        List<City> list = CitiesSource.getInstance().getCities();
+
+        for (int i = 0; i < list.size(); i++) {
+            cityItems.add(new CityItem(list.get(i).getName(), 0));
+        }
+
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
