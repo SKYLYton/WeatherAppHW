@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +21,8 @@ import com.weather.fragments.CountryFragment;
 import com.weather.fragments.SettingsFragment;
 import com.weather.receivers.NetworkReceiver;
 import com.weather.receivers.PowerConnectionReceiver;
+import com.weather.room.model.CitiesSource;
+import com.weather.room.model.City;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;

@@ -20,6 +20,8 @@ import com.weather.SelectedLocation;
 import com.weather.bottomsheet.BottomSheetCreator;
 import com.weather.retrofit.model.RetrofitRequest;
 import com.weather.retrofit.model.weather.WeatherRequest;
+import com.weather.room.model.CitiesSource;
+import com.weather.room.model.City;
 
 import java.util.Locale;
 
@@ -100,6 +102,12 @@ public class CountryFragment extends Fragment {
                 textViewPressure.setText(String.valueOf(weatherRequest.getMain().getPressure()));
 
                 textViewWind.setText(String.valueOf(weatherRequest.getWind().getSpeed()));
+
+                CitiesSource.getInstance().replaceCity(new City(cityName,
+                        weatherRequest.getMain().getTemp(),
+                        weatherRequest.getMain().getPressure(),
+                        weatherRequest.getWind().getSpeed()));
+
             } else {
                 BottomSheetCreator.show(getContext(), getString(R.string.toast_request_error));
             }
